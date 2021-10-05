@@ -1,9 +1,23 @@
 import express from "express";
+import cors from "cors";
+import mongoose from "mongoose";
+import listEndpoints from "express-list-endpoints";
+import postsRouter from "./services/blog/index.js";
+import {
+  notFoundHandler,
+  badRequestHandler,
+  genericErrorHandler,
+} from "./errorHandlers.js";
+const server = express();
+const port = process.env.PORT || 3001;
+server.use(cors());
+server.use(express.json());
 
-server = express();
-
+server.use("/posts", postsRouter);
+server.use(notFoundHandler);
+server.use(badRequestHandler);
+server.use(genericErrorHandler);
 mongoose.connect(process.env.MONGO_CONNECTION);
-
 mongoose.connection.on("connected", () => {
   console.log("Successfully connected to Mongo!");
   server.listen(port, () => {
