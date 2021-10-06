@@ -21,6 +21,7 @@ const blogPost = new Schema(
         required: false,
       },
     },
+    comments: [],
   },
   {
     timestamps: true, // adds createdAt and updatedAt automatically

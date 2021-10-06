@@ -1,13 +1,13 @@
 import express from "express";
 import createHttpError from "http-errors";
-import blogPost from "./schema.js";
-
+import blogPost from "../schema/blogSchema.js";
+import blogComment from "../schema/blogComments.js";
 const postsRouter = express.Router();
 
 postsRouter.post("/", async (req, res, next) => {
   try {
-    const newPost = new blogPost(req.body); // here happens validation of the req.body, if it is not ok Mongoose will throw a "ValidationError"
-    const { _id } = await newPost.save(); // this is where the interaction with the db/collection happens
+    const newPost = new blogPost(req.body);
+    const { _id } = await newPost.save();
 
     res.status(201).send({ _id });
   } catch (error) {
@@ -29,7 +29,7 @@ postsRouter.get("/:postId", async (req, res, next) => {
   try {
     const postId = req.params.postId;
 
-    const post = await blogPost.findById(postId); // similar to findOne, but findOne expects to receive a query as parameter
+    const post = await blogPost.findById(postId);
 
     if (post) {
       res.send(post);
@@ -45,7 +45,7 @@ postsRouter.put("/:postId", async (req, res, next) => {
   try {
     const postId = req.params.postId;
     const modifiedPost = await blogPost.findByIdAndUpdate(postId, req.body, {
-      new: true, // returns the modified post
+      new: true,
     });
 
     if (modifiedPost) {
@@ -73,5 +73,30 @@ postsRouter.delete("/:postId", async (req, res, next) => {
     next(error);
   }
 });
+postsRouter.post("/:postId/comments", async (req, res, next) => {
+  try {
+    const postId = req.params.postId;
 
+    const post = await blogPost.findById(postId);
+
+    if (post) {
+      const createComment = await blogComment.create(req.body);
+
+      const comment = { ...createComment.toObject() };
+      const updatePost = await blogPost.findByIdAndUpdate(req.params.postId, {
+        $push: { comments: comment },
+      });
+      console.log(comment);
+      res.send(updatePost);
+    } else {
+      next(createHttpError(404, `post with id ${postId} not found!`));
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+postsRouter.get("/:postId/comments", (req, res, next) => {});
+postsRouter.get("/:postId/comments/:commentId", (req, res, next) => {});
+postsRouter.put("/:postId/comments/:commentId", (req, res, next) => {});
+postsRouter.delete("/:postId/comments/:commentId", (req, res, next) => {});
 export default postsRouter;
