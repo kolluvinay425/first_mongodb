@@ -86,7 +86,7 @@ postsRouter.post("/:postId/comments", async (req, res, next) => {
       const updatePost = await blogPost.findByIdAndUpdate(req.params.postId, {
         $push: { comments: comment },
       });
-      console.log(comment);
+
       res.send(updatePost);
     } else {
       next(createHttpError(404, `post with id ${postId} not found!`));
