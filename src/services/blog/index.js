@@ -95,7 +95,20 @@ postsRouter.post("/:postId/comments", async (req, res, next) => {
     next(error);
   }
 });
-postsRouter.get("/:postId/comments", (req, res, next) => {});
+postsRouter.get("/:postId/comments", async (req, res, next) => {
+  try {
+    const postComment = await blogPost.findById(req.params.postId);
+    if (postComment) {
+      res.send(postComment.comments);
+    } else {
+      next(
+        createHttpError(404, `post with id ${req.params.postId} not found!`)
+      );
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 postsRouter.get("/:postId/comments/:commentId", (req, res, next) => {});
 postsRouter.put("/:postId/comments/:commentId", (req, res, next) => {});
 postsRouter.delete("/:postId/comments/:commentId", (req, res, next) => {});
