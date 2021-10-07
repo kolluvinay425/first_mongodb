@@ -109,7 +109,25 @@ postsRouter.get("/:postId/comments", async (req, res, next) => {
     next(error);
   }
 });
-postsRouter.get("/:postId/comments/:commentId", (req, res, next) => {});
+postsRouter.get("/:postId/comments/:commentId", async (req, res, next) => {
+  try {
+    const post = await blogPost.findById(req.params.postId);
+    if (post) {
+      const comment = post.comments.find(
+        (comment) => comment._id.toString() === req.params.commentId
+      );
+      if (comment) {
+        res.send(comment);
+      } else {
+        res
+          .status(401)
+          .send(`comment with id ${req.params.commentId} not found`);
+      }
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 postsRouter.put("/:postId/comments/:commentId", (req, res, next) => {});
 postsRouter.delete("/:postId/comments/:commentId", (req, res, next) => {});
 export default postsRouter;
