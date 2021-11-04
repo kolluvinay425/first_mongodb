@@ -3,7 +3,8 @@ import cors from "cors";
 import mongoose from "mongoose";
 import listEndpoints from "express-list-endpoints";
 import postsRouter from "./services/blog/index.js";
-
+import GoogleStrategy from "./services/auth/oauth.js";
+import passport from "passport";
 import {
   notFoundHandler,
   badRequestHandler,
@@ -14,7 +15,8 @@ const server = express();
 const port = process.env.PORT || 3001;
 server.use(cors());
 server.use(express.json());
-
+server.use(passport.initialize());
+passport.use("google", GoogleStrategy);
 server.use("/posts", postsRouter);
 server.use("/authors", authorRoutes);
 server.use(notFoundHandler);

@@ -1,8 +1,28 @@
 import express from "express";
 import author from "../schema/authors.js";
 import blogPost from "../schema/blogSchema.js";
+import basicAuthMiddleware from "../auth/basic_auth.js";
+import passport from "passport";
 const authorRoutes = express.Router();
 
+authorRoutes.get(
+  "/googleLogin",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+authorRoutes.get(
+  "/googleRedirect",
+  passport.authenticate("google"),
+  async (req, res, next) => {
+    try {
+      console.log(req.user); // we are going to receive the tokens here thanks to the passportNext function and the serializeUser function
+      res.redirect(
+        `http://localhost:3000?accessToken=${req.user.tokens.accessToken}&refreshToken=${req.user.tokens.refreshToken}`
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 authorRoutes.post("/", async (req, res, next) => {
   try {
     const postAuthor = new author(req.body);
@@ -11,6 +31,11 @@ authorRoutes.post("/", async (req, res, next) => {
   } catch (error) {
     console.log(error);
   }
+});
+authorRoutes.get("/me/stories", basicAuthMiddleware, async (req, res) => {
+  // console.log(req.headers);
+  const blogs = await blogPost.find({ author: req.user._id.toString() });
+  res.send(blogs);
 });
 authorRoutes.get("/", async (req, res, next) => {
   try {
@@ -24,9 +49,12 @@ authorRoutes.post("/:postId", async (req, res, next) => {
   try {
     const postId = await blogPost.findById(req.params.postId);
     if (postId) {
+      const post = {
+        ...postId.toObject(),
+      };
       const addauthor = await author.findByIdAndUpdate(
-        req.params.postId, // WHO we want to modify
-        { $push: { authors: req.body } }, // HOW we want to modify him/her
+        req.params.postId,
+        { $push: { posts: post } },
         { new: true }
       );
       res.send(addauthor);
