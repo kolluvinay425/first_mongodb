@@ -14,10 +14,7 @@ authorRoutes.get(
   passport.authenticate("google"),
   async (req, res, next) => {
     try {
-      console.log(req.user); // we are going to receive the tokens here thanks to the passportNext function and the serializeUser function
-      res.redirect(
-        `http://localhost:3000?accessToken=${req.user.tokens.accessToken}&refreshToken=${req.user.tokens.refreshToken}`
-      );
+      console.log("userr", req.user);
     } catch (error) {
       next(error);
     }

@@ -1,6 +1,6 @@
 import passport from "passport";
 import GoogleStrategy from "passport-google-oauth20";
-// import UserModel from "../users/schema.js";
+import author from "../schema/authors.js";
 // import { JWTAuthenticate } from "./tools.js";
 
 const googleStrategy = new GoogleStrategy(
@@ -11,9 +11,9 @@ const googleStrategy = new GoogleStrategy(
   },
   async (accessToken, refreshToken, googleProfile, passportNext) => {
     try {
-      console.log(googleProfile);
+      console.log("google profile", googleProfile);
 
-      //   const user = await UserModel.findOne({ googleId: googleProfile.id });
+      //   const user = await author.findOne({ googleId: googleProfile.id });
     } catch (error) {
       passportNext(error);
     }
